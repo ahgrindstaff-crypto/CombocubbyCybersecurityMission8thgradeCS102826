@@ -1,0 +1,289 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ComboCubby Case File</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500;600&family=Saira+Stencil+One&display=swap">
+<style>
+/* Layout: same case-file column as the Wren Vault; intro, predict, a tappable code listing with a review panel, then a fix round. */
+:root{
+  --bg:#E6EBEE; --panel:#F8FAFB; --ink:#14212B; --muted:#4F5E69; --line:#C3CDD3;
+  --brass:#8E6210; --brass-soft:#EAD8AC; --tape:#F4E9CB; --tape-ink:#2B2310;
+  --code-bg:#1B2731; --code-ink:#E2E9EE; --code-dim:#7F919E; --code-sel:#2D3D49;
+  --ok:#1F6B4B; --ok-soft:#D3EBDF; --warn:#A2372E; --warn-soft:#F5DCD8;
+  --f-display:"Saira Stencil One","Arial Black",Impact,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151A; --panel:#16212A; --ink:#E3E9ED; --muted:#97A6B0; --line:#2B3B47;
+  --brass:#DDAA4C; --brass-soft:#3A2E14; --tape:#251F12; --tape-ink:#F1E3BE;
+  --code-bg:#0A1014; --code-ink:#E2E9EE; --code-dim:#6E808C; --code-sel:#1E2C36;
+  --ok:#62C796; --ok-soft:#173527; --warn:#F2867B; --warn-soft:#3E1D1A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151A; --panel:#16212A; --ink:#E3E9ED; --muted:#97A6B0; --line:#2B3B47;
+  --brass:#DDAA4C; --brass-soft:#3A2E14; --tape:#251F12; --tape-ink:#F1E3BE;
+  --code-bg:#0A1014; --code-ink:#E2E9EE; --code-dim:#6E808C; --code-sel:#1E2C36;
+  --ok:#62C796; --ok-soft:#173527; --warn:#F2867B; --warn-soft:#3E1D1A; color-scheme:dark}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{text-wrap:balance;margin:0}
+p{margin:0}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:1.2rem;letter-spacing:.04em}
+.brand svg{width:32px;height:32px}
+.track{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.track .lbl{font-family:var(--f-mono);font-size:.78rem;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-right:4px}
+.pip{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--panel);display:grid;place-items:center;font-family:var(--f-mono);font-size:.78rem;font-weight:600;color:var(--muted)}
+.pip.done{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.ghost{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 12px;font-size:.85rem}
+.ghost:hover{color:var(--ink);border-color:var(--muted)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);font-weight:600}
+.big{font-family:var(--f-display);font-size:clamp(2.4rem,8.5vw,4.2rem);line-height:.95;letter-spacing:.02em}
+.h2{font-family:var(--f-display);font-size:clamp(1.6rem,5vw,2.2rem);line-height:1.05;letter-spacing:.02em}
+.lede{font-size:1.12rem;max-width:62ch}
+.label{font-weight:700;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.section{display:flex;flex-direction:column;gap:8px}
+.note{border-left:4px solid var(--brass);padding:4px 0 4px 14px;max-width:64ch}
+ul.list{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:8px}
+.safe{background:var(--ok-soft);border-radius:10px;padding:14px 16px;font-size:.95rem}
+.go{align-self:flex-start;background:var(--ink);color:var(--panel);border:0;border-radius:10px;padding:14px 22px;font-weight:700;font-size:1.05rem}
+.go:hover{background:var(--brass);color:var(--ink)}
+.legend{font-size:.9rem;color:var(--muted)}
+
+/* code listing */
+.code{background:var(--code-bg);border-radius:10px;padding:10px 0;overflow-x:auto}
+.ln{display:grid;grid-template-columns:3.2em 1fr auto;align-items:center;width:100%;min-width:max-content;border:0;background:none;color:var(--code-ink);
+  text-align:left;padding:1px 12px 1px 0;font-family:var(--f-mono);font-size:clamp(.78rem,2.3vw,.95rem);line-height:1.75;border-left:4px solid transparent}
+.ln:hover{background:var(--code-sel)}
+.ln .n{color:var(--code-dim);text-align:right;padding-right:14px;font-variant-numeric:tabular-nums;user-select:none}
+.ln pre{margin:0;font:inherit;white-space:pre}
+.ln .cm{color:var(--code-dim)}
+.ln.sel{background:var(--code-sel);border-left-color:var(--brass)}
+.ln.flag{border-left-color:var(--ok)}
+.badge{margin-left:14px;font-family:var(--f-body);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--ok);color:var(--code-bg);border-radius:4px;padding:1px 7px;white-space:nowrap}
+
+/* review panel */
+.ask{border:2px solid var(--brass);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--panel)}
+.snip{font-family:var(--f-mono);font-size:.92rem;background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:pre}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:11px 14px;color:var(--ink)}
+.opt:hover{border-color:var(--brass)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.fb{border-radius:10px;padding:12px 16px;background:var(--warn-soft)}
+.fb.good{background:var(--ok-soft)}
+.fb.info{background:var(--brass-soft)}
+.report{display:flex;flex-direction:column;gap:10px}
+.ritem{border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:8px;padding:10px 14px;font-size:.95rem;background:var(--bg)}
+.ritem b{display:block}
+.hint{background:var(--brass-soft);border-radius:8px;padding:10px 14px;font-size:.95rem}
+
+.reveal{border:2px solid var(--ok);background:var(--ok-soft)}
+.stamp{align-self:flex-start;font-family:var(--f-display);color:var(--ok);border:3px solid var(--ok);border-radius:6px;padding:2px 12px;font-size:1.4rem;letter-spacing:.08em;transform:rotate(-3deg)}
+dl.vocab{margin:0;display:grid;grid-template-columns:minmax(0,13em) minmax(0,1fr);gap:10px 18px}
+dl.vocab dt{font-weight:700}
+dl.vocab dd{margin:0}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.9rem}
+.danger{background:var(--warn);color:var(--panel);border:0;border-radius:8px;padding:6px 12px;font-weight:700}
+@media (max-width:560px){.card{padding:18px} dl.vocab{grid-template-columns:1fr;gap:2px} dl.vocab dd{margin-bottom:10px}}
+</style>
+
+<div class="wrap">
+  <div class="bar">
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true">
+        <rect x="5" y="4" width="30" height="32" rx="3" fill="var(--panel)" stroke="var(--brass)" stroke-width="3"/>
+        <line x1="11" y1="13" x2="29" y2="13" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="11" y1="20" x2="24" y2="20" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="11" y1="27" x2="27" y2="27" stroke="var(--brass)" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      WREN CASE FILES
+    </div>
+    <div class="track" id="track" aria-live="polite"></div>
+  </div>
+  <main id="stage"></main>
+  <div id="resetZone"></div>
+</div>
+
+<script>
+(function(){
+const C={"key": "w5-combocubby", "eyebrow": "Code Studio \u00b7 Cybersecurity \u00b7 Case file W-5", "title": "ComboCubby", "app": "ComboCubby", "story": "Agent Wren is out of retirement. A startup hired her to review ComboCubby, a new app that keeps your locker combination safe behind a password. It launches Friday. Wren read the code and says 5 security risks are hiding in it. She wants a crew to find them and fix them before she sends her report. That crew is yours.", "predict": "ComboCubby keeps locker combinations behind a password. Talk with your crew for one minute: if you were building this app, what could go wrong?", "lines": [["// ComboCubby v0.9: saves your locker combination", null, "Comments are notes for people. This one just names the app."], ["var MASTER_PASSWORD = \"cubby2026\";", "A"], ["var users = [", null], ["  {name: \"mira\", password: \"sunflower\", combo: \"12-34-08\"},", "B"], ["  {name: \"theo\", password: \"rocket7\", combo: \"05-19-27\"}", "B"], ["];", null], ["var wrongTries = 0;", null, "Counting wrong tries is a good start. Keep reading: does the app ever use that count?"], ["", null], ["onEvent(\"loginButton\", \"click\", function() {", null], ["  var name = getText(\"nameInput\");", null], ["  var pass = getText(\"passInput\");", null], ["  var user = findUser(name);", null, "Looking up the account by name is a normal step in any login."], ["  if (user == null) {", null], ["    setText(\"status\", \"No account named \" + name + \".\");", "D"], ["  } else if (pass == user.password || pass == MASTER_PASSWORD) {", "A"], ["    showCombo(user);", null, "Showing the combo after a correct login is the app's whole job."], ["  } else {", null], ["    wrongTries = wrongTries + 1;", "C"], ["    setText(\"status\", \"Wrong password. Try again!\");", "C"], ["  }", null], ["});", null], ["", null], ["function showCombo(user) {", null], ["  setText(\"comboLabel\", \"Combo: \" + user.combo);", null, "The owner just logged in correctly, so showing their own combo is fine."], ["  setText(\"status\", \"Hi \" + user.name + \"! Your password is \" + user.password);", "E"], ["}", null], ["", null], ["function findUser(name) {", null], ["  for (var i = 0; i < users.length; i++) {", null], ["    if (users[i].name == name) {", null], ["      return users[i];", null], ["    }", null], ["  }", null], ["  return null;", null], ["}", null]], "order": ["A", "B", "C", "D", "E"], "risks": {"A": {"label": "A secret is written right in the code", "found": "The master password opens every locker, and it's typed right into the code. Anyone who reads the code, or hears that one password, gets in. A hidden shortcut like this is called a back door."}, "B": {"label": "Passwords are saved so anyone can read them", "found": "If someone copies this list, they have every password. Lots of people reuse passwords, so the damage spreads to their other accounts too."}, "C": {"label": "Nothing stops someone from guessing forever", "found": "The app counts wrong tries but never does anything with the count. In the Wren Vault, your crew opened a lock by trying every shift. Unlimited tries let anyone do the same thing to a password."}, "D": {"label": "The message helps a stranger learn which accounts are real", "found": "A stranger can type names until this message stops showing. Now they know which accounts exist, which is half of what they'd need."}, "E": {"label": "A password shows up on the screen", "found": "Anyone looking over a shoulder, or at a screenshot, now has the password."}}, "fixes": {"A": {"q": "How should ComboCubby close the back door?", "opts": [["Make the master password longer and harder to guess.", false, "Harder to guess, but it's still sitting in the code. Anyone who reads the code still gets in."], ["Move the master password into a comment so it doesn't run.", false, "A comment is still in the code file. Anyone who reads it still sees the secret."], ["Delete the master password, so each person's own password is the only way in.", true, "No back door means no secret to leak. If staff need to help someone, that should be a separate, carefully checked tool."]]}, "B": {"q": "How should ComboCubby store passwords?", "opts": [["Save the passwords in ALL CAPS.", false, "ALL CAPS is still perfectly readable."], ["Save a scrambled fingerprint of each password, and compare fingerprints at login.", true, "The app can check a password without keeping the real one. If the list leaks, nobody can read the passwords. This is called hashing."], ["Move the user list to the bottom of the file.", false, "Moving it doesn't hide it. Anyone who scrolls down can still read every password."]]}, "C": {"q": "How should ComboCubby handle wrong guesses?", "opts": [["Reset wrongTries to 0 after every wrong guess.", false, "Then the count is always 0, and nothing ever stops a guesser."], ["Change the message to \"Wrong password, keep trying!\"", false, "Friendlier, but a guesser can still try forever."], ["After 5 wrong tries, lock the account for 10 minutes.", true, "Now guessing every possible password would take years instead of minutes. This is called a lockout."]]}, "D": {"q": "What should the app say when a login fails?", "opts": [["\"Name or password is wrong.\"", true, "The same message for both mistakes. A stranger learns nothing about which accounts are real."], ["\"No account named mira. Did you mean mia?\"", false, "Now the app is suggesting real account names to strangers."], ["Show a list of account names so people can pick theirs.", false, "That hands every account name to anyone who opens the app."]]}, "E": {"q": "What should the welcome message say?", "opts": [["\"Hi mira! Your password starts with sun.\"", false, "Even part of a password helps a guesser."], ["Show the password in a smaller font.", false, "Small text is still readable, especially in a screenshot."], ["\"Hi mira!\"", true, "The app never needs to show a password once someone has typed it."]]}}, "hints": ["Look for anything that stores, shows, or checks a password.", "Read every setText line. What does each one put on the screen, and who could see it?", "One line uses the word \"or\". Who else can get in on that line?"], "reply": "Nice work, crew. Every one of these risks got past ComboCubby's builders. They tested whether the app worked, and it did. Nobody tested how it could fail. That part takes a human.", "vocab": [["Back door", "A hidden way in that skips the normal lock."], ["Hardcoded secret", "A password or key typed right into the code."], ["Hashing", "Saving a scrambled fingerprint of a password instead of the password."], ["Lockout", "Pausing an account after too many wrong guesses."], ["Vague error message", "A message that says something failed without helping a stranger."]], "judgment": "Launch is Friday, and the builders only have time to fix one risk before then. Which one should they fix first, and why? Be ready to defend your pick."};
+const KEY="wrenCase."+C.key;
+const N=C.order.length;
+let st={phase:"intro",found:[],fix:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s&&s.phase) st=Object.assign(st,s);}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const $=s=>document.querySelector(s);
+const stage=$("#stage");
+let sel=null, fb=null, wrongPicks=[], hintsShown=0, fixFb=null, fixWrong=[], fixDone=false, confirmReset=false;
+
+function linesOf(r){return C.lines.map((l,i)=>[l,i]).filter(([l])=>l[1]===r).map(([,i])=>i);}
+
+function track(){
+  const t=$("#track");
+  if(st.phase==="review"||st.phase==="fix"||st.phase==="done"){
+    const fixing=st.phase!=="review";
+    const count=fixing?Math.min(st.fix,N):st.found.length;
+    t.innerHTML=`<span class="lbl">${fixing?"Fixed":"Found"} ${count}/${N}</span>`+
+      C.order.map((r,k)=>{const d=fixing?k<st.fix:st.found.includes(r);return `<span class="pip ${d?"done":""}">${d?"✓":k+1}</span>`;}).join("");
+  } else t.innerHTML="";
+}
+function resetZone(){
+  const z=$("#resetZone");
+  if(st.phase==="intro"){z.innerHTML="";return;}
+  z.innerHTML=confirmReset
+    ?`<div class="confirm">Start this case file over? This clears your crew's progress on this computer. <button class="danger" id="rYes">Yes, start over</button><button class="ghost" id="rNo">Cancel</button></div>`
+    :`<button class="ghost" id="rAsk">Start case over</button>`;
+  if(confirmReset){
+    $("#rYes").onclick=()=>{st={phase:"intro",found:[],fix:0};save();confirmReset=false;sel=null;lastFound=null;fb=null;hintsShown=0;fixFb=null;fixDone=false;render();};
+    $("#rNo").onclick=()=>{confirmReset=false;resetZone();};
+  } else $("#rAsk").onclick=()=>{confirmReset=true;resetZone();};
+}
+function go(phase){st.phase=phase;save();render();window.scrollTo({top:0});}
+function render(){
+  track();resetZone();
+  ({intro,predict,review,fix,done})[st.phase]();
+}
+
+function intro(){
+  stage.innerHTML=`<section class="card">
+    <div class="eyebrow">${esc(C.eyebrow)}</div>
+    <h1 class="big">${esc(C.title)}</h1>
+    <p class="lede">${esc(C.story)}</p>
+    <div class="section"><div class="label">Crew roles · switch after every two risks</div>
+      <ul class="list">
+        <li>The <b>Reader</b> reads the code out loud, one line at a time.</li>
+        <li>The <b>Reviewer</b> decides which line to flag and why.</li>
+        <li>The <b>Scribe</b> writes down each risk and its line number.</li>
+      </ul></div>
+    <div class="safe"><b>You're the defense.</b> Security reviewers read code before an app launches, so problems get fixed before anyone gets hurt. You won't attack, log into, or break anything. The app, its code, and everyone in it are made up.</div>
+    <button class="go" id="b">Open the case file</button>
+  </section>`;
+  $("#b").onclick=()=>go("predict");
+}
+
+function predict(){
+  stage.innerHTML=`<section class="card">
+    <div class="eyebrow">Step 1 · Predict</div>
+    <h2 class="h2">Before you read any code</h2>
+    <p class="note">${esc(C.predict)}</p>
+    <p class="legend">Scribe: jot down your crew's guesses. You'll check them against the code in a minute. Guesses don't have to be right.</p>
+    <button class="go" id="b">We talked it over. Show the code.</button>
+  </section>`;
+  $("#b").onclick=()=>go("review");
+}
+
+function codeHTML(){
+  return C.lines.map((l,i)=>{
+    const [txt,r]=l;
+    const isFound=r&&st.found.includes(r);
+    const cm=/^\s*\/\//.test(txt);
+    const badge=isFound?`<span class="badge">Risk ${C.order.indexOf(r)+1}</span>`:"<span></span>";
+    return `<button class="ln${i===sel?" sel":""}${isFound?" flag":""}" data-i="${i}" aria-label="Line ${i+1}"><span class="n">${i+1}</span><pre${cm?' class="cm"':""}>${esc(txt)||" "}</pre>${badge}</button>`;
+  }).join("");
+}
+
+function review(){
+  const all=st.found.length===N;
+  let panel="";
+  if(sel!==null&&!all){
+    const [txt,r]=C.lines[sel];
+    if(r&&st.found.includes(r)){
+      panel=`<div class="ask"><div class="label">Line ${sel+1}</div><div class="snip">${esc(txt)}</div>
+        <div class="fb info">Already in your report. Line ${sel+1} is part of Risk ${C.order.indexOf(r)+1}: ${esc(C.risks[r].label)}.</div></div>`;
+    } else {
+      panel=`<div class="ask" id="ask"><div class="label">Line ${sel+1} · What's the risk here?</div><div class="snip">${esc(txt)||" "}</div>
+        <div class="opts" id="opts">${C.order.map(k=>`<button class="opt${wrongPicks.includes(k)?" wrong":""}" data-r="${k}">${esc(C.risks[k].label)}</button>`).join("")}</div>
+        ${fb?`<div class="fb ${fb.cls||""}" role="status">${fb.html}</div>`:""}</div>`;
+    }
+  }
+  const report=st.found.length?`<div class="section"><div class="label">Your crew's report</div><div class="report">${
+    C.order.filter(r=>st.found.includes(r)).map(r=>`<div class="ritem"><b>Risk ${C.order.indexOf(r)+1} · Line ${linesOf(r).map(n=>n+1).join(", ")} · ${esc(C.risks[r].label)}</b>${esc(C.risks[r].found)}</div>`).join("")
+  }</div></div>`:"";
+  stage.innerHTML=`<section class="card">
+    <div class="eyebrow">Step 2 · Review</div>
+    <h2 class="h2">${all?"All "+N+" risks found.":"Find the "+N+" risks in "+esc(C.app)+"."}</h2>
+    <p class="lede">${all?"Wren's report is ready for the fix round.":"Tap a line you think is risky, then pick what's wrong with it. Some lines are perfectly safe."}</p>
+    <div class="code" id="code">${codeHTML()}</div>
+    ${panel}
+    ${lastFound?`<div class="fb good" role="status"><b>Risk found!</b> ${esc(C.risks[lastFound].found)}</div>`:""}
+    ${all?`<button class="go" id="next">Go to the fix round</button>`:""}
+    ${report}
+    ${all?"":`<div class="section" id="hints">${C.hints.slice(0,hintsShown).map((h,k)=>`<div class="hint"><b>Hint ${k+1}:</b> ${esc(h)}</div>`).join("")}${hintsShown<C.hints.length?`<button class="ghost" id="hb" style="align-self:flex-start">Show a hint</button>`:""}</div>`}
+  </section>`;
+  $("#code").onclick=e=>{const b=e.target.closest(".ln");if(!b)return;sel=+b.dataset.i;fb=null;wrongPicks=[];lastFound=null;review();
+    const a=$(".ask"); if(a) a.scrollIntoView({behavior:"smooth",block:"nearest"});};
+  const o=$("#opts");
+  if(o) o.onclick=e=>{
+    const b=e.target.closest(".opt");if(!b)return;
+    const pick=b.dataset.r, [,r,note]=C.lines[sel];
+    if(!r){
+      wrongPicks.push(pick);
+      fb={html:`<b>Line ${sel+1} looks safe.</b> ${esc(note||"It doesn't store, show, send, or check anything private. Try a different line.")}`};
+      review();
+    } else if(pick===r){
+      st.found.push(r);save();lastFound=r;sel=null;fb=null;wrongPicks=[];render();
+    } else {
+      wrongPicks.push(pick);
+      fb={html:`<b>Good eye.</b> Something is wrong on line ${sel+1}, but that's not the reason. Read the line again and try a different one.`};
+      review();
+    }
+  };
+  const hb=$("#hb"); if(hb) hb.onclick=()=>{hintsShown++;review();};
+  const nx=$("#next"); if(nx) nx.onclick=()=>{lastFound=null;go("fix");};
+}
+let lastFound=null;
+
+function fix(){
+  if(st.fix>=N) return go("done");
+  const r=C.order[st.fix], F=C.fixes[r];
+  const snip=linesOf(r).map(i=>`${String(i+1).padStart(2," ")}  ${C.lines[i][0]}`).join("\n");
+  stage.innerHTML=`<section class="card">
+    <div class="eyebrow">Step 3 · Fix ${st.fix+1} of ${N}</div>
+    <h2 class="h2">${esc(C.risks[r].label)}</h2>
+    <div class="snip">${esc(snip)}</div>
+    <div class="section"><div class="label">${esc(F.q)}</div>
+      <div class="opts" id="opts">${F.opts.map((o,k)=>`<button class="opt${fixWrong.includes(k)?" wrong":""}${fixDone&&o[1]?" right":""}" data-k="${k}"${fixDone?" disabled":""}>${esc(o[0])}</button>`).join("")}</div></div>
+    ${fixFb?`<div class="fb ${fixFb.cls||""}" role="status">${fixFb.html}</div>`:""}
+    ${fixDone?`<button class="go" id="next">${st.fix+1<N?"Next fix":"Send the report"}</button>`:""}
+  </section>`;
+  $("#opts").onclick=e=>{
+    const b=e.target.closest(".opt");if(!b||fixDone)return;
+    const k=+b.dataset.k, o=F.opts[k];
+    if(o[1]){fixDone=true;fixFb={cls:"good",html:`<b>Fixed.</b> ${esc(o[2])}`};}
+    else{fixWrong.push(k);fixFb={html:`<b>Not safe yet.</b> ${esc(o[2])}`};}
+    fix();
+  };
+  const nx=$("#next"); if(nx) nx.onclick=()=>{st.fix++;save();fixDone=false;fixFb=null;fixWrong=[];render();window.scrollTo({top:0});};
+}
+
+function done(){
+  stage.innerHTML=`<section class="card reveal">
+    <div class="stamp">Report sent</div>
+    <div class="section"><div class="label">Wren's reply</div><p class="note">${esc(C.reply)}</p></div>
+    <div class="section"><div class="label">Words for what you found</div>
+      <dl class="vocab">${C.vocab.map(([t,d])=>`<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join("")}</dl></div>
+    <div class="section"><div class="label">Your call · more than one good answer</div><p class="lede">${esc(C.judgment)}</p></div>
+    <div class="section"><div class="label">Crew check · talk it over, nothing to turn in</div>
+      <ul class="list">
+        <li><b>Persistence:</b> Which risk was hardest to spot? What made your crew keep reading?</li>
+        <li><b>Teamwork:</b> When did the Reader, Reviewer, or Scribe catch something the others missed?</li>
+        <li>Look back at your predictions from Step 1. Which ones showed up in the code?</li>
+      </ul></div>
+  </section>`;
+}
+
+render();
+})();
+</script>
+
+</body></html>
