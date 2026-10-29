@@ -1,10 +1,14 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ComboCubby Case File</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500;600&family=Saira+Stencil+One&display=swap">
 <style>
+*,*::before,*::after{box-sizing:border-box}
 /* Layout: same case-file column as the Wren Vault; intro, predict, a tappable code listing with a review panel, then a fix round. */
 :root{
   --bg:#E6EBEE; --panel:#F8FAFB; --ink:#14212B; --muted:#4F5E69; --line:#C3CDD3;
@@ -26,7 +30,7 @@
   --code-bg:#0A1014; --code-ink:#E2E9EE; --code-dim:#6E808C; --code-sel:#1E2C36;
   --ok:#62C796; --ok-soft:#173527; --warn:#F2867B; --warn-soft:#3E1D1A; color-scheme:dark}
 
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
 .wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 h1,h2,h3{text-wrap:balance;margin:0}
@@ -95,7 +99,10 @@ dl.vocab dd{margin:0}
 .danger{background:var(--warn);color:var(--panel);border:0;border-radius:8px;padding:6px 12px;font-weight:700}
 @media (max-width:560px){.card{padding:18px} dl.vocab{grid-template-columns:1fr;gap:2px} dl.vocab dd{margin-bottom:10px}}
 </style>
-
+</head>
+<body>
+<noscript><div style="max-width:640px;margin:40px auto;padding:20px;border:3px solid #A2372E;border-radius:12px;background:#F5DCD8;color:#14212B;font:18px/1.5 system-ui,sans-serif">
+<b>This case file needs JavaScript to run.</b> JavaScript is turned off or blocked on this device. Tell Mr. Grindstaff so he can check the settings.</div></noscript>
 <div class="wrap">
   <div class="bar">
     <div class="brand">
@@ -125,6 +132,8 @@ const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"
 const $=s=>document.querySelector(s);
 const stage=$("#stage");
 let sel=null, fb=null, wrongPicks=[], hintsShown=0, fixFb=null, fixWrong=[], fixDone=false, confirmReset=false;
+let reviewOrder=C.order.slice(), fixOrder=null;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 function linesOf(r){return C.lines.map((l,i)=>[l,i]).filter(([l])=>l[1]===r).map(([,i])=>i);}
 
@@ -144,7 +153,7 @@ function resetZone(){
     ?`<div class="confirm">Start this case file over? This clears your crew's progress on this computer. <button class="danger" id="rYes">Yes, start over</button><button class="ghost" id="rNo">Cancel</button></div>`
     :`<button class="ghost" id="rAsk">Start case over</button>`;
   if(confirmReset){
-    $("#rYes").onclick=()=>{st={phase:"intro",found:[],fix:0};save();confirmReset=false;sel=null;lastFound=null;fb=null;hintsShown=0;fixFb=null;fixDone=false;render();};
+    $("#rYes").onclick=()=>{st={phase:"intro",found:[],fix:0};save();confirmReset=false;sel=null;lastFound=null;fb=null;hintsShown=0;fixFb=null;fixDone=false;fixWrong=[];fixOrder=null;render();};
     $("#rNo").onclick=()=>{confirmReset=false;resetZone();};
   } else $("#rAsk").onclick=()=>{confirmReset=true;resetZone();};
 }
@@ -202,7 +211,7 @@ function review(){
         <div class="fb info">Already in your report. Line ${sel+1} is part of Risk ${C.order.indexOf(r)+1}: ${esc(C.risks[r].label)}.</div></div>`;
     } else {
       panel=`<div class="ask" id="ask"><div class="label">Line ${sel+1} · What's the risk here?</div><div class="snip">${esc(txt)||" "}</div>
-        <div class="opts" id="opts">${C.order.map(k=>`<button class="opt${wrongPicks.includes(k)?" wrong":""}" data-r="${k}">${esc(C.risks[k].label)}</button>`).join("")}</div>
+        <div class="opts" id="opts">${reviewOrder.map(k=>`<button class="opt${wrongPicks.includes(k)?" wrong":""}" data-r="${k}">${esc(C.risks[k].label)}</button>`).join("")}</div>
         ${fb?`<div class="fb ${fb.cls||""}" role="status">${fb.html}</div>`:""}</div>`;
     }
   }
@@ -220,7 +229,7 @@ function review(){
     ${report}
     ${all?"":`<div class="section" id="hints">${C.hints.slice(0,hintsShown).map((h,k)=>`<div class="hint"><b>Hint ${k+1}:</b> ${esc(h)}</div>`).join("")}${hintsShown<C.hints.length?`<button class="ghost" id="hb" style="align-self:flex-start">Show a hint</button>`:""}</div>`}
   </section>`;
-  $("#code").onclick=e=>{const b=e.target.closest(".ln");if(!b)return;sel=+b.dataset.i;fb=null;wrongPicks=[];lastFound=null;review();
+  $("#code").onclick=e=>{const b=e.target.closest(".ln");if(!b)return;sel=+b.dataset.i;fb=null;wrongPicks=[];lastFound=null;reviewOrder=shuffle(C.order);review();
     const a=$(".ask"); if(a) a.scrollIntoView({behavior:"smooth",block:"nearest"});};
   const o=$("#opts");
   if(o) o.onclick=e=>{
@@ -246,13 +255,14 @@ let lastFound=null;
 function fix(){
   if(st.fix>=N) return go("done");
   const r=C.order[st.fix], F=C.fixes[r];
+  if(!fixOrder) fixOrder=shuffle(F.opts.map((_,k)=>k));
   const snip=linesOf(r).map(i=>`${String(i+1).padStart(2," ")}  ${C.lines[i][0]}`).join("\n");
   stage.innerHTML=`<section class="card">
     <div class="eyebrow">Step 3 · Fix ${st.fix+1} of ${N}</div>
     <h2 class="h2">${esc(C.risks[r].label)}</h2>
     <div class="snip">${esc(snip)}</div>
     <div class="section"><div class="label">${esc(F.q)}</div>
-      <div class="opts" id="opts">${F.opts.map((o,k)=>`<button class="opt${fixWrong.includes(k)?" wrong":""}${fixDone&&o[1]?" right":""}" data-k="${k}"${fixDone?" disabled":""}>${esc(o[0])}</button>`).join("")}</div></div>
+      <div class="opts" id="opts">${fixOrder.map(k=>{const o=F.opts[k];return `<button class="opt${fixWrong.includes(k)?" wrong":""}${fixDone&&o[1]?" right":""}" data-k="${k}"${fixDone?" disabled":""}>${esc(o[0])}</button>`;}).join("")}</div></div>
     ${fixFb?`<div class="fb ${fixFb.cls||""}" role="status">${fixFb.html}</div>`:""}
     ${fixDone?`<button class="go" id="next">${st.fix+1<N?"Next fix":"Send the report"}</button>`:""}
   </section>`;
@@ -263,7 +273,7 @@ function fix(){
     else{fixWrong.push(k);fixFb={html:`<b>Not safe yet.</b> ${esc(o[2])}`};}
     fix();
   };
-  const nx=$("#next"); if(nx) nx.onclick=()=>{st.fix++;save();fixDone=false;fixFb=null;fixWrong=[];render();window.scrollTo({top:0});};
+  const nx=$("#next"); if(nx) nx.onclick=()=>{st.fix++;save();fixDone=false;fixFb=null;fixWrong=[];fixOrder=null;render();window.scrollTo({top:0});};
 }
 
 function done(){
@@ -285,5 +295,5 @@ function done(){
 render();
 })();
 </script>
-
-</body></html>
+</body>
+</html>
